@@ -5,9 +5,10 @@
  * @format
  */
 
-import React from 'react';
+import React, {useEffect} from 'react';
 import type {PropsWithChildren} from 'react';
 import {
+  Platform,
   SafeAreaView,
   ScrollView,
   StatusBar,
@@ -25,6 +26,20 @@ import {
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 
+import SQLite from 'react-native-sqlite-storage';
+const openDatabaseAsync = () => {
+  return new Promise<SQLite.SQLiteDatabase>((resolve, reject) => {
+    SQLite.openDatabase(
+      {
+        name: 'testDB.sqlite',
+        createFromLocation: 1,
+        location: 'default',
+      },
+      dbInstance => resolve(dbInstance),
+      error => reject(error),
+    );
+  });
+};
 type SectionProps = PropsWithChildren<{
   title: string;
 }>;
@@ -55,7 +70,36 @@ function Section({children, title}: SectionProps): React.JSX.Element {
   );
 }
 
+const dbTest = async () => {
+  try {
+    const db = await openDatabaseAsync();
+    console.log(`${Platform.OS}에서 DB 열기 성공`);
+
+    db.transaction(tx => {
+      tx.executeSql(
+        'SELECT * FROM tb_info',
+        [],
+        (tx, results) => {
+          const rows = results.rows;
+          for (let i = 0; i < rows.length; i++) {
+            console.log(rows.item(i));
+          }
+        },
+        (tx, error) => {
+          console.log('쿼리 에러: ', error);
+        },
+      );
+    });
+  } catch (error) {
+    console.error('DB 열기 실패: ', error);
+  }
+};
+
 function App(): React.JSX.Element {
+  useEffect(() => {
+    dbTest();
+  }, []);
+
   const isDarkMode = useColorScheme() === 'dark';
 
   const backgroundStyle = {
