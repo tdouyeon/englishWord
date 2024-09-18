@@ -2,10 +2,10 @@ import React, {useState, useEffect} from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
 import AddWordScreen from '../screens/AddWordScreen';
 import WordListScreen from '../screens/WordListScreen';
-import {NavigationContainer} from '@react-navigation/native';
+import {NavigationContainer, useNavigation} from '@react-navigation/native';
 import {RootStackParamList} from './types';
 import {dbOpen} from '../database/db';
-import {View, Text} from 'react-native';
+import {View, Text, TouchableOpacity, Image, StyleSheet} from 'react-native';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -34,7 +34,22 @@ const AppNavigator = () => {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="WordList">
+      <Stack.Navigator
+        initialRouteName="WordList"
+        screenOptions={({navigation}) => ({
+          headerTintColor: 'black',
+          headerTitleStyle: {fontWeight: 'bold'},
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={() => navigation.goBack()}
+              style={styles.headerButton}>
+              <Image
+                source={require('../../assets/images/leftArrow.png')}
+                style={styles.headerIcon}
+              />
+            </TouchableOpacity>
+          ),
+        })}>
         <Stack.Screen
           name="WordList"
           component={WordListScreen}
@@ -49,5 +64,16 @@ const AppNavigator = () => {
     </NavigationContainer>
   );
 };
+
+const styles = StyleSheet.create({
+  headerButton: {
+    marginLeft: 15,
+  },
+  headerIcon: {
+    width: 15,
+    height: 15,
+    tintColor: 'black',
+  },
+});
 
 export default AppNavigator;
