@@ -1,5 +1,5 @@
 export type RootStackParamList = {
   Home: undefined;
-  AddWord: undefined;
+  AddWord: {AddWord: Array<any>} | undefined;
   WordList: {wordList: Array<any>} | undefined;
 };

@@ -33,9 +33,7 @@ export const getAllWords = (): Promise<WordData[]> => {
         'SELECT * FROM words',
         [],
         (tx, results) => {
-          console.log(results, '리젤트');
           const rows = results.rows;
-          console.log(rows, '로우즈');
           const words: WordData[] = [];
 
           for (let i = 0; i < rows.length; i++) {
@@ -64,6 +62,27 @@ export const getWordCount = (): Promise<number> => {
       tx.executeSql(
         'SELECT COUNT(*) AS count FROM words',
         [],
+        (tx, results) => {
+          const count = results.rows.item(0).count;
+          resolve(count);
+        },
+        (tx, error) => reject(`Error fetching word count: ${error.message}`),
+      );
+    });
+  });
+};
+
+export const getCategoryWordCount = (category: string): Promise<number> => {
+  return new Promise((resolve, reject) => {
+    if (!db) {
+      reject('DB가 열리지 않았습니다.');
+      return;
+    }
+
+    db.transaction(tx => {
+      tx.executeSql(
+        'SELECT COUNT(*) AS count FROM words WHERE category = ?',
+        [category],
         (tx, results) => {
           const count = results.rows.item(0).count;
           resolve(count);

@@ -1,4 +1,5 @@
 import {getDatabase} from '../db';
+import {CategoryData} from '../models/categoryModel';
 
 const db = getDatabase();
 
@@ -18,10 +19,7 @@ export const addCategory = async (name: string) => {
   });
 };
 
-export const getAllCategories = async (): Promise<
-  {id: number; name: string}[]
-> => {
-  console.log(db, '있지요?');
+export const getAllCategories = async (): Promise<CategoryData[]> => {
   return new Promise((resolve, reject) => {
     if (!db) {
       reject('Database not opened');

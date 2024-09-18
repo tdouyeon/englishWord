@@ -1,10 +1,12 @@
 import React, {useEffect, useState} from 'react';
-import {View, Text, Image, FlatList} from 'react-native';
+import {View, Text, Image, FlatList, Pressable} from 'react-native';
 import {getAllWords} from '../database/queries/wordQueries';
 import {WordData} from '../database/models/wordModel';
 import {getAllCategories} from '../database/queries/categoryQueries';
+import {useTypedNavigation} from '../navigation/hooks';
 
 const WordListScreen = () => {
+  const navigation = useTypedNavigation();
   const [wordList, setWordList] = useState<WordData[]>();
 
   const getCategories = async () => {
@@ -35,7 +37,16 @@ const WordListScreen = () => {
   // );
 
   return (
-    <Text>리스트페이지</Text>
+    <View>
+      <Pressable
+        onPress={() => {
+          navigation.navigate('AddWord');
+        }}>
+        <Text>단어 추가</Text>
+      </Pressable>
+      <Text>리스트페이지</Text>
+    </View>
+
     // <FlatList
     //   data={wordList}
     //   keyExtractor={item => item.id}
