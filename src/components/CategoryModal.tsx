@@ -4,10 +4,10 @@ import {
   View,
   Text,
   TextInput,
-  Button,
   TouchableOpacity,
   StyleSheet,
-  Animated,
+  TouchableWithoutFeedback,
+  Alert,
 } from 'react-native';
 
 type CategoryModalProps = {
@@ -28,6 +28,8 @@ const CategoryModal = ({
       onAddCategory(categoryName);
       setCategoryName('');
       onClose();
+    } else {
+      Alert.alert('한글자 이상 입력해 주세요.');
     }
   };
 
@@ -37,31 +39,33 @@ const CategoryModal = ({
       transparent={true}
       visible={visible}
       onRequestClose={onClose}>
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalContainer}>
-          <Text style={styles.title}>카테고리명을 입력해 주세요.</Text>
+      <TouchableOpacity style={styles.modalOverlay} onPress={onClose}>
+        <TouchableWithoutFeedback>
+          <View style={styles.modalContainer}>
+            <Text style={styles.title}>카테고리명을 입력해 주세요.</Text>
 
-          <TextInput
-            style={styles.input}
-            placeholder="카테고리 이름"
-            value={categoryName}
-            onChangeText={setCategoryName}
-          />
+            <TextInput
+              style={styles.input}
+              placeholder="카테고리 이름"
+              value={categoryName}
+              onChangeText={setCategoryName}
+            />
 
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity
-              onPress={handleAddCategory}
-              style={[styles.button, styles.saveButton]}>
-              <Text style={styles.saveButtonText}>저장</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={onClose}
-              style={[styles.button, styles.cancelButton]}>
-              <Text style={styles.cancelButtonText}>취소</Text>
-            </TouchableOpacity>
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity
+                onPress={handleAddCategory}
+                style={[styles.button, styles.saveButton]}>
+                <Text style={styles.saveButtonText}>저장</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={onClose}
+                style={[styles.button, styles.cancelButton]}>
+                <Text style={styles.cancelButtonText}>취소</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
-      </View>
+        </TouchableWithoutFeedback>
+      </TouchableOpacity>
     </Modal>
   );
 };
