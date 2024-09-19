@@ -76,7 +76,7 @@ const AddWordScreen = () => {
         imageUri,
       };
       insertWord(newWord);
-      navigation.navigate('WordList');
+      navigation.navigate('CategoryList');
     } else {
       Alert.alert('안내사항', '단어, 의미, 카테고리는 필수입니다.');
     }

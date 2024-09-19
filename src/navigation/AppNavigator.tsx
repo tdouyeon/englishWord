@@ -6,6 +6,7 @@ import {NavigationContainer, useNavigation} from '@react-navigation/native';
 import {RootStackParamList} from './types';
 import {dbOpen} from '../database/db';
 import {View, Text, TouchableOpacity, Image, StyleSheet} from 'react-native';
+import CategoryListScreen from '../screens/CategoryListScreen';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -35,7 +36,7 @@ const AppNavigator = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName="WordList"
+        initialRouteName="CategoryList"
         screenOptions={({navigation}) => ({
           headerTintColor: 'black',
           headerTitleStyle: {fontWeight: 'bold'},
@@ -49,16 +50,32 @@ const AppNavigator = () => {
               />
             </TouchableOpacity>
           ),
+          headerRight: () => (
+            <TouchableOpacity
+              onPress={() => navigation.navigate('AddWord')}
+              style={styles.headerPlusIcon}>
+              <Image
+                source={require('../../assets/images/plus.png')}
+                style={styles.plusImage}
+                alt="단어 추가"
+              />
+            </TouchableOpacity>
+          ),
         })}>
+        <Stack.Screen
+          name="CategoryList"
+          component={CategoryListScreen}
+          options={{title: '카테고리별 리스트', headerLeft: () => null}}
+        />
         <Stack.Screen
           name="WordList"
           component={WordListScreen}
-          options={{title: '단어 리스트'}}
+          options={{title: '단어 리스트', headerRight: () => null}}
         />
         <Stack.Screen
           name="AddWord"
           component={AddWordScreen}
-          options={{title: '단어 추가'}}
+          options={{title: '단어 추가', headerRight: () => null}}
         />
       </Stack.Navigator>
     </NavigationContainer>
@@ -73,6 +90,17 @@ const styles = StyleSheet.create({
     width: 15,
     height: 15,
     tintColor: 'black',
+  },
+  headerPlusIcon: {
+    flex: 1,
+    justifyContent: 'center', // 수직 중앙 정렬
+    alignItems: 'center',
+  },
+  plusImage: {
+    position: 'absolute',
+    width: 30,
+    height: 30,
+    right: 10,
   },
 });
 
