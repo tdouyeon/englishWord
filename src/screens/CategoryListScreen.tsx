@@ -48,7 +48,7 @@ const CategoryListScreen = () => {
     };
 
     fetchCategories();
-  }, []);
+  });
 
   if (loading) {
     return (
