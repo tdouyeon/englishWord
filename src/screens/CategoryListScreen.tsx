@@ -4,6 +4,7 @@ import {getAllCategories} from '../database/queries/categoryQueries';
 import {CategoryData} from '../database/models/categoryModel';
 import {getCategoryWordCount} from '../database/queries/wordQueries';
 import {useTypedNavigation} from '../navigation/hooks';
+import {useFocusEffect} from '@react-navigation/native';
 
 const CategoryListScreen = () => {
   const [categories, setCategories] = useState<{name: string; count: number}[]>(
@@ -11,44 +12,49 @@ const CategoryListScreen = () => {
   );
   const [loading, setLoading] = useState(true);
   const navigation = useTypedNavigation();
-
   const onClickCategory = async (category: string) => {
     navigation.navigate('WordList', {category});
   };
+  const fetchCategories = async () => {
+    try {
+      const data = await getAllCategories();
+      fetchCategoryCount(data);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchCategoryCount = async (categories: CategoryData[]) => {
+    try {
+      const categoriesCount = await Promise.all(
+        categories.map(async ({name}: CategoryData) => {
+          try {
+            const count = await getCategoryWordCount(name);
+            return {name, count};
+          } catch (error) {
+            console.error('Error fetching category count:', error);
+            return {name, count: 0};
+          }
+        }),
+      );
+      setCategories(categoriesCount);
+    } catch (error) {
+      console.error('Error fetching category counts:', error);
+    }
+  };
 
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const data = await getAllCategories();
-        fetchCategoryCount(data);
-      } catch (error) {
-        console.error('Error fetching categories:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    const fetchCategoryCount = async (categories: CategoryData[]) => {
-      try {
-        const categoriesCount = await Promise.all(
-          categories.map(async ({name}: CategoryData) => {
-            try {
-              const count = await getCategoryWordCount(name);
-              return {name, count};
-            } catch (error) {
-              console.error('Error fetching category count:', error);
-              return {name, count: 0};
-            }
-          }),
-        );
-        setCategories(categoriesCount);
-      } catch (error) {
-        console.error('Error fetching category counts:', error);
-      }
-    };
-
     fetchCategories();
-  });
+  }, []);
+
+  // 뒤로가기로 Foucs돼도 인지 가능하도록 useFocusEffect 사용
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchCategories();
+    }, []),
+  );
 
   if (loading) {
     return (

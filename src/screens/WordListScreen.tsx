@@ -7,12 +7,23 @@ import {
   StyleSheet,
   TouchableOpacity,
   TouchableWithoutFeedback,
+  Alert,
+  TextInput,
+  Pressable,
+  NativeSyntheticEvent,
+  TextInputChangeEventData,
 } from 'react-native';
-import {getWordsByCategoryName} from '../database/queries/wordQueries';
+import {
+  deleteWord,
+  getWordsByCategoryName,
+  updateWord,
+} from '../database/queries/wordQueries';
 import {WordData} from '../database/models/wordModel';
 import {RouteProp, useRoute} from '@react-navigation/native';
 import {RootStackParamList} from '../navigation/types';
 import {Checkbox} from 'react-native-paper';
+import {SwipeListView} from 'react-native-swipe-list-view';
+
 type WordListRouteProp = RouteProp<RootStackParamList, 'WordList'>;
 
 const options = ['사진', '단어', '의미', '발음'];
@@ -21,7 +32,8 @@ const WordListScreen = () => {
   const route = useRoute<WordListRouteProp>();
   const {category} = route.params;
   const [wordList, setWordList] = useState<WordData[]>();
-  const [showList, setShowList] = useState(['사진', '단어', '의미']);
+  const [showList, setShowList] = useState(options);
+  const [editId, setEditId] = useState('');
 
   const [dropdownVisible, setDropdownVisible] = useState(false);
   const getCategoryWords = async () => {
@@ -49,25 +61,87 @@ const WordListScreen = () => {
     }
   };
 
+  const updateRow = async (
+    id: string,
+    key: string,
+    event: NativeSyntheticEvent<TextInputChangeEventData>,
+  ) => {
+    const text = event.nativeEvent.text;
+    const newWordList = wordList?.map(word => {
+      if (word.id == id) {
+        return {...word, [key]: text};
+      } else {
+        return word;
+      }
+    }) as WordData[]; // 타입 캐스팅
+    setWordList(newWordList);
+  };
+
+  const deleteRow = async (word: string) => {
+    Alert.alert(
+      '확인',
+      '이 작업을 계속 하시겠습니까?',
+      [
+        {
+          text: '취소',
+          onPress: () => console.log('취소됨'),
+          style: 'cancel', // iOS에서는 '취소' 스타일을 지정
+        },
+        {
+          text: '확인',
+          onPress: async () => {
+            await deleteWord(word);
+            await getCategoryWords();
+          },
+        },
+      ],
+      {cancelable: false}, // 사용자가 경고창 밖을 터치해도 닫히지 않도록 설정
+    );
+  };
+
   const renderItem = ({item}: {item: WordData}) => (
-    <View style={styles.wordContainer}>
+    <TouchableOpacity
+      style={styles.wordContainer}
+      onPress={() => setDropdownVisible(false)}
+      activeOpacity={1}>
       <View style={styles.wordImage}>
         {item.imageUri && showList.includes('사진') && (
           <Image source={{uri: item.imageUri}} style={styles.wordImage} />
         )}
       </View>
       <View style={styles.wordDetails}>
-        <Text style={styles.wordText}>
-          {showList.includes('단어') && `${item.word}`}
-        </Text>
-        <Text style={styles.wordText}>
-          {showList.includes('의미') && `${item.meaning}`}
-        </Text>
-        <Text style={styles.wordText}>
-          {showList.includes('발음') && `[${item.pronunciation}]`}
-        </Text>
+        <TextInput
+          style={styles.input}
+          value={showList.includes('단어') ? item.word : ''}
+          editable={editId === item.id}
+          multiline
+          numberOfLines={100}
+          onChange={event => {
+            updateRow(item.id, 'word', event);
+          }}
+        />
+        <TextInput
+          style={styles.input}
+          value={showList.includes('의미') ? item.meaning : ''}
+          editable={editId === item.id}
+          multiline
+          numberOfLines={100}
+          onChange={event => {
+            updateRow(item.id, 'meaning', event);
+          }}
+        />
+        <TextInput
+          style={styles.input}
+          value={showList.includes('발음') ? item.pronunciation : ''}
+          editable={editId === item.id}
+          multiline
+          numberOfLines={100}
+          onChange={event => {
+            updateRow(item.id, 'pronunciation', event);
+          }}
+        />
       </View>
-    </View>
+    </TouchableOpacity>
   );
 
   return (
@@ -75,10 +149,9 @@ const WordListScreen = () => {
       style={styles.container}
       onPress={() => setDropdownVisible(false)}
       activeOpacity={1}>
-      <TouchableOpacity
+      <Pressable
         style={styles.dropdown}
-        onPress={() => setDropdownVisible(!dropdownVisible)}
-        activeOpacity={1}>
+        onPress={() => setDropdownVisible(!dropdownVisible)}>
         <View style={styles.optionChoose}>
           <View style={styles.optionView}>
             <Text style={styles.optionChooseText}>필터</Text>
@@ -91,15 +164,28 @@ const WordListScreen = () => {
             />
           </View>
 
-          <TouchableWithoutFeedback style={styles.selectedOptionContainer}>
-            <View style={{display: 'flex', flexDirection: 'row'}}>
-              {showList.map(option => (
-                <View style={styles.selectedOptionView}>
-                  <Text style={styles.selectedOption}>{option}</Text>
+          <View style={styles.selectedOptionContainer}>
+            <View style={{display: 'flex', flexDirection: 'row', flex: 1}}>
+              {showList.map((option, index) => (
+                <View style={styles.selectedOptionView} key={index}>
+                  <Text>{option}</Text>
                 </View>
               ))}
+              {editId && (
+                <TouchableOpacity
+                  style={styles.editComplate}
+                  onPress={async () => {
+                    const editWord = wordList?.find(
+                      word => word.id === editId,
+                    ) as WordData;
+                    await updateWord(editWord);
+                    setEditId('');
+                  }}>
+                  <Text>완료</Text>
+                </TouchableOpacity>
+              )}
             </View>
-          </TouchableWithoutFeedback>
+          </View>
         </View>
 
         {dropdownVisible && (
@@ -119,6 +205,8 @@ const WordListScreen = () => {
               <FlatList
                 data={options}
                 keyExtractor={item => item}
+                initialNumToRender={10} // 첫 렌더링 시 최대 10개의 항목만 렌더링
+                maxToRenderPerBatch={10} // 배치 당 최대 10개의 항목을 렌더링
                 renderItem={({item}) => (
                   <TouchableOpacity onPress={() => handleOptionPress(item)}>
                     <View
@@ -144,7 +232,7 @@ const WordListScreen = () => {
             </View>
           </TouchableWithoutFeedback>
         )}
-      </TouchableOpacity>
+      </Pressable>
       <View style={styles.graphHeader}>
         <Text style={styles.graphHeaderText}>사진</Text>
         <Text style={styles.graphHeaderText}>단어</Text>
@@ -152,11 +240,32 @@ const WordListScreen = () => {
         <Text style={styles.graphHeaderText}>발음</Text>
       </View>
 
-      <FlatList
+      <SwipeListView
         data={wordList}
         keyExtractor={item => item.id}
         renderItem={renderItem}
+        disableRightSwipe={false}
         contentContainerStyle={styles.listContent}
+        renderHiddenItem={(data, rowMap) => (
+          <View style={styles.rowBack}>
+            <TouchableOpacity
+              style={styles.backLeftBtn}
+              onPress={() => {
+                {
+                  setEditId(data.item.id);
+                  rowMap[data.item.id].closeRow();
+                }
+              }}>
+              <Text style={styles.backText}>수정</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.backRightBtn, styles.backRightBtnRight]}
+              onPress={() => deleteRow(data.item.word)}>
+              <Text style={styles.backTextWhite}>삭제</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+        rightOpenValue={-120}
       />
     </TouchableOpacity>
   );
@@ -187,7 +296,6 @@ const styles = StyleSheet.create({
   },
   wordContainer: {
     backgroundColor: 'white',
-    borderRadius: 10,
     borderBottomWidth: 1,
     borderColor: '#E1E1E1',
     paddingVertical: 12,
@@ -211,7 +319,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     alignItems: 'center',
   },
-  wordText: {
+  input: {
     fontSize: 16,
     color: '#333',
     marginBottom: 4,
@@ -225,6 +333,7 @@ const styles = StyleSheet.create({
   selectedOptionContainer: {
     display: 'flex',
     flexDirection: 'row',
+    flex: 1,
   },
   selectedOptionView: {
     backgroundColor: '#F1F3F5',
@@ -232,7 +341,14 @@ const styles = StyleSheet.create({
     marginHorizontal: 2,
     borderRadius: 5,
   },
-  selectedOption: {},
+  editComplate: {
+    position: 'absolute',
+    right: 10,
+    backgroundColor: '#FCC9AA',
+    padding: 10,
+    marginHorizontal: 2,
+    borderRadius: 20,
+  },
   optionChoose: {
     paddingVertical: 10,
     display: 'flex',
@@ -269,6 +385,42 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 12,
     right: 10,
+  },
+  rowBack: {
+    alignItems: 'center',
+    backgroundColor: '#DDD',
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    paddingLeft: 15,
+  },
+  backLeftBtn: {
+    alignItems: 'center',
+    bottom: 0,
+    justifyContent: 'center',
+    position: 'absolute',
+    top: 0,
+    right: 60,
+    width: 60,
+    backgroundColor: '#E1E1E1',
+  },
+  backRightBtn: {
+    alignItems: 'center',
+    bottom: 0,
+    justifyContent: 'center',
+    position: 'absolute',
+    top: 0,
+    width: 60,
+  },
+  backRightBtnRight: {
+    backgroundColor: 'red',
+    right: 0,
+  },
+  backTextWhite: {
+    color: '#FFF',
+  },
+  backText: {
+    color: 'black',
   },
 });
 

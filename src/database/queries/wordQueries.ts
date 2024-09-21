@@ -140,7 +140,7 @@ export const updateWord = (wordData: WordData) => {
   });
 };
 
-export const deleteWord = (id: string) => {
+export const deleteWord = (word: string) => {
   if (!db) {
     console.error('DB가 열리지 않았습니다.');
     return;
@@ -148,8 +148,8 @@ export const deleteWord = (id: string) => {
 
   db.transaction(tx => {
     tx.executeSql(
-      `DELETE FROM words WHERE id = ?`,
-      [id],
+      `DELETE FROM words WHERE word = ?`,
+      [word],
       () => console.log('Word deleted successfully'),
       error => console.error('Error deleting word: ', error),
     );
