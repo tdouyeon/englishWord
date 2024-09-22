@@ -3,7 +3,7 @@ import {CategoryData} from '../models/categoryModel';
 
 const db = getDatabase();
 
-export const addCategory = async (name: string) => {
+export const addCategory = async (id: string, name: string) => {
   if (!db) {
     console.error('Database not opened');
     return;
@@ -11,8 +11,8 @@ export const addCategory = async (name: string) => {
 
   db.transaction(tx => {
     tx.executeSql(
-      `INSERT INTO categories (name) VALUES (?)`,
-      [name],
+      `INSERT INTO categories (id, name) VALUES (?, ?)`,
+      [id, name],
       () => console.log('Category added successfully'),
       error => console.error('Error adding category: ', error),
     );
@@ -46,7 +46,7 @@ export const getAllCategories = async (): Promise<CategoryData[]> => {
   });
 };
 
-export const updateCategory = async (id: number, newName: string) => {
+export const updateCategory = async (id: string, newName: string) => {
   if (!db) {
     console.error('Database not opened');
     return;
@@ -62,7 +62,7 @@ export const updateCategory = async (id: number, newName: string) => {
   });
 };
 
-export const deleteCategory = async (id: number) => {
+export const deleteCategory = async (id: string) => {
   if (!db) {
     console.error('Database not opened');
     return;

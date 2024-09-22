@@ -77,6 +77,47 @@ const initializeTables = (): Promise<void> => {
   });
 };
 
+// 모든 데이터 삭제
+export const clearDatabase = async (): Promise<void> => {
+  if (!db) {
+    console.error('Database not initialized');
+    return;
+  }
+
+  try {
+    await new Promise<void>((resolve, reject) => {
+      db?.transaction(tx => {
+        tx.executeSql(
+          'DELETE FROM words',
+          [],
+          () => {
+            console.log('Words table cleared successfully');
+          },
+          (tx, error) => {
+            console.error('Error clearing words table: ', error);
+            reject(error);
+          },
+        );
+
+        tx.executeSql(
+          'DELETE FROM categories',
+          [],
+          () => {
+            console.log('Categories table cleared successfully');
+            resolve();
+          },
+          (tx, error) => {
+            console.error('Error clearing categories table: ', error);
+            reject(error);
+          },
+        );
+      });
+    });
+  } catch (error) {
+    console.error('Error clearing database: ', error);
+  }
+};
+
 // 데이터베이스 인스턴스를 가져오는 함수
 export const getDatabase = (): SQLite.SQLiteDatabase | null => db;
 

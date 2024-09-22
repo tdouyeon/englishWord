@@ -10,8 +10,6 @@ import {
   Alert,
   TextInput,
   Pressable,
-  NativeSyntheticEvent,
-  TextInputChangeEventData,
 } from 'react-native';
 import {
   deleteWord,
@@ -61,12 +59,7 @@ const WordListScreen = () => {
     }
   };
 
-  const updateRow = async (
-    id: string,
-    key: string,
-    event: NativeSyntheticEvent<TextInputChangeEventData>,
-  ) => {
-    const text = event.nativeEvent.text;
+  const updateRow = async (id: string, key: string, text: string) => {
     const newWordList = wordList?.map(word => {
       if (word.id == id) {
         return {...word, [key]: text};
@@ -116,8 +109,8 @@ const WordListScreen = () => {
           editable={editId === item.id}
           multiline
           numberOfLines={100}
-          onChange={event => {
-            updateRow(item.id, 'word', event);
+          onChangeText={text => {
+            updateRow(item.id, 'word', text);
           }}
         />
         <TextInput
@@ -126,8 +119,8 @@ const WordListScreen = () => {
           editable={editId === item.id}
           multiline
           numberOfLines={100}
-          onChange={event => {
-            updateRow(item.id, 'meaning', event);
+          onChangeText={text => {
+            updateRow(item.id, 'meaning', text);
           }}
         />
         <TextInput
@@ -136,8 +129,8 @@ const WordListScreen = () => {
           editable={editId === item.id}
           multiline
           numberOfLines={100}
-          onChange={event => {
-            updateRow(item.id, 'pronunciation', event);
+          onChangeText={text => {
+            updateRow(item.id, 'pronunciation', text);
           }}
         />
       </View>

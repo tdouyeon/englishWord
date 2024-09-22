@@ -83,7 +83,7 @@ const AddWordScreen = () => {
   };
 
   const onAddCategory = async (categoryName: string) => {
-    await addCategory(categoryName);
+    await addCategory(Date.now().toString(), categoryName);
     await getCategories();
   };
 
