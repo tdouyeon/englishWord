@@ -13,6 +13,7 @@ import {
   KeyboardAvoidingView,
   ScrollView,
   Platform,
+  Linking,
 } from 'react-native';
 import {Picker} from '@react-native-picker/picker';
 import {useTypedNavigation} from '../navigation/hooks';
@@ -85,6 +86,13 @@ const AddWordScreen = () => {
     }
   };
 
+  const onPressNaverButton = async (word: string) => {
+    const url = `https://endic.naver.com/search.nhn?sLn=ko&searchOption=all&query=${encodeURIComponent(
+      word,
+    )}`;
+    Linking.openURL(url);
+  };
+
   const onAddCategory = async (categoryName: string) => {
     await addCategory(Date.now().toString(), categoryName);
     await getCategories();
@@ -96,19 +104,31 @@ const AddWordScreen = () => {
       behavior="padding"
       keyboardVerticalOffset={Platform.OS == 'ios' ? 70 : 0}>
       <ScrollView contentContainerStyle={{flexGrow: 1}}>
-        <Pressable onPress={selectImage} style={styles.image}>
-          {!imageUri ? (
-            <View style={styles.imageContainer}>
-              <Image
-                source={require('../../assets/images/plus.png')}
-                style={styles.plusImage}
-                alt="사진 선택"
-              />
-            </View>
-          ) : (
-            <Image source={{uri: imageUri}} style={styles.image} />
-          )}
-        </Pressable>
+        <View style={styles.topView}>
+          <Pressable onPress={selectImage} style={styles.image}>
+            {!imageUri ? (
+              <View style={styles.imageContainer}>
+                <Image
+                  source={require('../../assets/images/plus.png')}
+                  style={styles.plusImage}
+                  alt="사진 선택"
+                />
+              </View>
+            ) : (
+              <Image source={{uri: imageUri}} style={styles.image} />
+            )}
+          </Pressable>
+          <TouchableOpacity
+            onPress={() => {
+              onPressNaverButton(word);
+            }}>
+            <Image
+              source={require('../../assets/images/naver.png')}
+              style={styles.naverImg}
+            />
+            <Text>사전</Text>
+          </TouchableOpacity>
+        </View>
         <View style={styles.categoryContainer}>
           <TouchableOpacity
             onPress={() => {
@@ -218,6 +238,11 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     flex: 1,
   },
+  topView: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
   input: {
     borderColor: '#ccc',
     borderBottomWidth: 1,
@@ -261,6 +286,7 @@ const styles = StyleSheet.create({
     right: 10,
     top: 5,
   },
+  naverImg: {width: 30, height: 30, marginBottom: 5},
   modalOverlay: {
     flex: 1,
     justifyContent: 'flex-end',
