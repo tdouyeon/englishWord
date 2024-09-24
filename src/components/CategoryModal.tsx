@@ -8,6 +8,8 @@ import {
   StyleSheet,
   TouchableWithoutFeedback,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 
 type CategoryModalProps = {
@@ -41,16 +43,18 @@ const CategoryModal = ({
       onRequestClose={onClose}>
       <TouchableOpacity style={styles.modalOverlay} onPress={onClose}>
         <TouchableWithoutFeedback>
-          <View style={styles.modalContainer}>
+          <KeyboardAvoidingView
+            style={styles.modalContainer}
+            behavior="padding"
+            keyboardVerticalOffset={Platform.OS == 'ios' ? 20 : 0}>
             <Text style={styles.title}>카테고리명을 입력해 주세요.</Text>
-
             <TextInput
               style={styles.input}
-              placeholder="카테고리 이름"
+              placeholder="카테고리명"
+              placeholderTextColor="#ccc"
               value={categoryName}
               onChangeText={setCategoryName}
             />
-
             <View style={styles.buttonContainer}>
               <TouchableOpacity
                 onPress={handleAddCategory}
@@ -63,7 +67,7 @@ const CategoryModal = ({
                 <Text style={styles.cancelButtonText}>취소</Text>
               </TouchableOpacity>
             </View>
-          </View>
+          </KeyboardAvoidingView>
         </TouchableWithoutFeedback>
       </TouchableOpacity>
     </Modal>
@@ -72,7 +76,7 @@ const CategoryModal = ({
 
 const styles = StyleSheet.create({
   modalOverlay: {
-    flex: 1,
+    flexGrow: 1,
     justifyContent: 'flex-end',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
@@ -103,6 +107,7 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     flexDirection: 'row',
+    paddingBottom: 10,
   },
   button: {
     flex: 1,

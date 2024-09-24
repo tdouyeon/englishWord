@@ -412,6 +412,7 @@ const styles = StyleSheet.create({
     color: '#333',
     marginBottom: 4,
     width: 90,
+    textAlign: 'center',
   },
   dropdown: {
     position: 'relative',

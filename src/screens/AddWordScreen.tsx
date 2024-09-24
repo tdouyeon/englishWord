@@ -10,6 +10,9 @@ import {
   TouchableOpacity,
   StyleSheet,
   TouchableWithoutFeedback,
+  KeyboardAvoidingView,
+  ScrollView,
+  Platform,
 } from 'react-native';
 import {Picker} from '@react-native-picker/picker';
 import {useTypedNavigation} from '../navigation/hooks';
@@ -88,9 +91,12 @@ const AddWordScreen = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <View>
-        <Pressable onPress={selectImage}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior="padding"
+      keyboardVerticalOffset={Platform.OS == 'ios' ? 70 : 0}>
+      <ScrollView contentContainerStyle={{flexGrow: 1}}>
+        <Pressable onPress={selectImage} style={styles.image}>
           {!imageUri ? (
             <View style={styles.imageContainer}>
               <Image
@@ -126,35 +132,31 @@ const AddWordScreen = () => {
         </View>
         <TextInput
           placeholder="단어 (영어)"
+          placeholderTextColor="#ccc"
           value={word}
           onChangeText={setWord}
           style={styles.input}
         />
         <TextInput
           placeholder="뜻"
+          placeholderTextColor="#ccc"
           value={meaning}
           onChangeText={setMeaning}
           style={styles.input}
         />
         <TextInput
           placeholder="발음"
+          placeholderTextColor="#ccc"
           value={pronunciation}
           onChangeText={setPronunciation}
           style={styles.input}
         />
-        {visible && (
-          <CategoryModal
-            visible={visible}
-            onClose={() => setVisible(false)}
-            onAddCategory={(categoryName: string) => {
-              onAddCategory(categoryName);
-            }}
-          />
-        )}
+      </ScrollView>
+      <View style={styles.saveButtonContainer}>
+        <Pressable onPress={addWord} style={styles.saveButton}>
+          <Text style={styles.saveButtonText}>저장</Text>
+        </Pressable>
       </View>
-      <Pressable onPress={addWord} style={styles.saveButton}>
-        <Text style={styles.saveButtonText}>저장</Text>
-      </Pressable>
       {categoryList.length > 0 && isCategoryListVisible && (
         <Modal
           visible={isCategoryListVisible}
@@ -197,7 +199,16 @@ const AddWordScreen = () => {
           </TouchableOpacity>
         </Modal>
       )}
-    </View>
+      {visible && (
+        <CategoryModal
+          visible={visible}
+          onClose={() => setVisible(false)}
+          onAddCategory={(categoryName: string) => {
+            onAddCategory(categoryName);
+          }}
+        />
+      )}
+    </KeyboardAvoidingView>
   );
 };
 
@@ -206,7 +217,6 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: 'white',
     flex: 1,
-    justifyContent: 'space-between',
   },
   input: {
     borderColor: '#ccc',
@@ -214,7 +224,7 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     paddingBottom: 10,
     paddingLeft: 10,
-    color: '#343A40',
+    color: 'black',
     fontSize: 16,
   },
   categoryText: {
@@ -294,6 +304,10 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 18,
   },
+  saveButtonContainer: {
+    flexGrow: 1,
+    justifyContent: 'flex-end',
+  },
   saveButton: {
     backgroundColor: '#FFC0CB',
     paddingHorizontal: 10,
@@ -301,6 +315,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 5,
+    marginBottom: 30,
   },
   saveButtonText: {fontSize: 18},
 });
