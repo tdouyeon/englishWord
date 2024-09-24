@@ -10,6 +10,8 @@ import {
   Alert,
   TextInput,
   Pressable,
+  PermissionsAndroid,
+  Platform,
 } from 'react-native';
 import {
   deleteWord,
@@ -21,11 +23,32 @@ import {RouteProp, useRoute} from '@react-navigation/native';
 import {RootStackParamList} from '../navigation/types';
 import {Checkbox} from 'react-native-paper';
 import {SwipeListView} from 'react-native-swipe-list-view';
+import SoundPlayer from 'react-native-sound-player';
+import RNFS from 'react-native-fs';
 
 type WordListRouteProp = RouteProp<RootStackParamList, 'WordList'>;
 
 const options = ['사진', '단어', '의미', '발음'];
 
+// 권한 요청 함수
+const requestStoragePermission = async () => {
+  try {
+    const granted = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+      {
+        title: '저장소 접근 권한',
+        message: '앱이 저장소에 접근할 수 있도록 허용해 주세요.',
+        buttonNeutral: '나중에',
+        buttonNegative: '취소',
+        buttonPositive: '허용',
+      },
+    );
+    return granted === PermissionsAndroid.RESULTS.GRANTED;
+  } catch (err) {
+    console.warn(err);
+    return false;
+  }
+};
 const WordListScreen = () => {
   const route = useRoute<WordListRouteProp>();
   const {category} = route.params;
@@ -92,6 +115,63 @@ const WordListScreen = () => {
     );
   };
 
+  const handlePressPronunciation = async (text: string) => {
+    try {
+      // http://localhost:3000/synthesize
+      // http://192.168.35.151:3000/synthesize
+      const response = await fetch('http://192.168.35.151:3000/synthesize', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({text}),
+      });
+
+      if (response.ok) {
+        const blob = await response.blob();
+        console.log(blob, 'blob예요');
+        const reader = new FileReader();
+
+        reader.onloadend = async () => {
+          const base64data = reader.result as string; // base64 데이터
+
+          // 로컬 경로 설정
+          const path = `${RNFS.DocumentDirectoryPath}/audio.mp3`;
+
+          // 권한 확인 및 요청
+          const hasPermission = await requestStoragePermission();
+          if (!hasPermission && Platform.OS == 'android') {
+            Alert.alert(
+              '권한이 필요합니다',
+              '저장소 접근 권한을 허용해 주세요.',
+            );
+            return;
+          }
+
+          // base64 데이터를 파일로 저장
+          await RNFS.writeFile(path, base64data, 'base64');
+          console.log('파일이 성공적으로 저장되었습니다:', path);
+          const fileExists = await RNFS.exists(path);
+          console.log('파일 존재 여부:', fileExists);
+
+          // 저장된 파일 경로로 음성 재생
+          try {
+            SoundPlayer.playUrl(`file://${path}`);
+            console.log(`실제 플레이 요청 경로: file://${path}`);
+          } catch (error) {
+            console.error('Audio playback error:', error);
+          }
+        };
+
+        reader.readAsDataURL(blob); // Blob 데이터를 base64로 변환
+      } else {
+        console.error('Failed to fetch audio:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error during speech synthesis:', error);
+    }
+  };
+
   const renderItem = ({item}: {item: WordData}) => (
     <TouchableOpacity
       style={styles.wordContainer}
@@ -123,16 +203,25 @@ const WordListScreen = () => {
             updateRow(item.id, 'meaning', text);
           }}
         />
-        <TextInput
-          style={styles.input}
-          value={showList.includes('발음') ? item.pronunciation : ''}
-          editable={editId === item.id}
-          multiline
-          numberOfLines={100}
-          onChangeText={text => {
-            updateRow(item.id, 'pronunciation', text);
-          }}
-        />
+        <TouchableOpacity onPress={() => handlePressPronunciation(item.word)}>
+          {item?.pronunciation ? (
+            <TextInput
+              style={styles.input}
+              value={showList.includes('발음') ? item.pronunciation : ''}
+              editable={editId === item.id}
+              multiline
+              numberOfLines={100}
+              onChangeText={text => {
+                updateRow(item.id, 'pronunciation', text);
+              }}
+            />
+          ) : (
+            <Image
+              source={require('../../assets/images/volume.png')} // 이미지 경로를 설정
+              style={styles.volumnImage}
+            />
+          )}
+        </TouchableOpacity>
       </View>
     </TouchableOpacity>
   );
@@ -298,6 +387,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     position: 'relative',
     zIndex: 1,
+  },
+  volumnImage: {
+    marginHorizontal: 40,
+    width: 20,
+    height: 20,
+    opacity: 0.7,
   },
   wordImage: {
     width: 70,
