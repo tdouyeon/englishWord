@@ -1,79 +1,20 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+프로젝트 노션 링크: https://pastoral-muskmelon-f40.notion.site/220ef104a49140759696d9cf8bf23845?pvs=4
+<h3>1. 기획의도</h3>
+<p>평소 영단어 어플을 쓰면서 있으면 좋겠다 싶은 기능들을 간단하게 추가해 보았습니다.</p>
+<h3>2. 개발 일정</h3>
+<p>기획부터 개발까지 대략 2주 정도 소요 되었습니다.</p>
+<h3>3. 개발 환경</h3>
+<img width="1168" alt="스크린샷 2024-09-25 오전 4 45 27" src="https://github.com/user-attachments/assets/68b60d4f-929d-4131-aa6d-e1fa2ebfccb3">
+<h3>4. 기능 소개</h3>
+<img width="926" alt="스크린샷 2024-09-25 오후 5 49 26" src="https://github.com/user-attachments/assets/f148a824-a924-408d-93ca-e3db5a7d0fc4">
+<p>- react-native-image-picker 패키지를 이용하여 사용자가 단어 등록 시 사진을 선택하고 업로드할 수 있는 기능을 구현하였습니다.
+   <br />- 단어 등록 시 네이버 사전 링크를 추가하여 사용자가 작성한 영단어를 쿼리스트링을 통해 바로 검색할 수 있도록 편의성을 높였습니다.
+</p>
+<br />
 
-# Getting Started
-
->**Note**: Make sure you have completed the [React Native - Environment Setup](https://reactnative.dev/docs/environment-setup) instructions till "Creating a new application" step, before proceeding.
-
-## Step 1: Start the Metro Server
-
-First, you will need to start **Metro**, the JavaScript _bundler_ that ships _with_ React Native.
-
-To start Metro, run the following command from the _root_ of your React Native project:
-
-```bash
-# using npm
-npm start
-
-# OR using Yarn
-yarn start
-```
-
-## Step 2: Start your Application
-
-Let Metro Bundler run in its _own_ terminal. Open a _new_ terminal from the _root_ of your React Native project. Run the following command to start your _Android_ or _iOS_ app:
-
-### For Android
-
-```bash
-# using npm
-npm run android
-
-# OR using Yarn
-yarn android
-```
-
-### For iOS
-
-```bash
-# using npm
-npm run ios
-
-# OR using Yarn
-yarn ios
-```
-
-If everything is set up _correctly_, you should see your new app running in your _Android Emulator_ or _iOS Simulator_ shortly provided you have set up your emulator/simulator correctly.
-
-This is one way to run your app — you can also run it directly from within Android Studio and Xcode respectively.
-
-## Step 3: Modifying your App
-
-Now that you have successfully run the app, let's modify it.
-
-1. Open `App.tsx` in your text editor of choice and edit some lines.
-2. For **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Developer Menu** (<kbd>Ctrl</kbd> + <kbd>M</kbd> (on Window and Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (on macOS)) to see your changes!
-
-   For **iOS**: Hit <kbd>Cmd ⌘</kbd> + <kbd>R</kbd> in your iOS Simulator to reload the app and see your changes!
-
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [Introduction to React Native](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you can't get this to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+<img width="705" alt="스크린샷 2024-09-25 오후 7 49 10" src="https://github.com/user-attachments/assets/a1e7c03b-e500-4672-8e8f-373ada0e3fde">
+<p>- react-native-swipe-list-view 패키지를 사용하여 리스트에서 단어를 좌우로 스와이프하여 수정 또는 삭제할 수 있는 기능을 구현하였습니다.</p>
+<br />
+<img width="705" alt="스크린샷 2024-09-25 오후 7 52 36" src="https://github.com/user-attachments/assets/c6916e41-24fd-442a-8ef6-7accbab177c7">
+<p>- react-native-sound-player 패키지와 Cloud Text-to-Speech API를 연동하여 단어의 발음을 들려주는 기능을 구현하였습니다. 이를 통해 유저가 정확한 발음을 쉽게 확인할 수 있습니다. <br />
+- 필터 기능을 구현하여 유저들이 좀 더 편하게 단어를 외울 수 있도록 하였습니다.</p>
